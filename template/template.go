@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	// "github.com/leekchan/accounting"
 	"ibsi/utils"
+	"ibsi/session"
 )
 
 var Router *mux.Router
@@ -38,6 +39,7 @@ type Controller struct {
 	ValueParam string
 	OnInitHandlers InitHandlers
 	OnInitPageData InitPageData
+	OnInitPageData2 InitPageData2
 	OnInitTemplateCustomData InitTemplateCustomData
 	OnInitCallbackData InitCallbackData
 	OnInitCustomData InitCustomData
@@ -47,6 +49,7 @@ type InitTemplateCustomData func(*http.Request, *Page) (interface{})
 type InitCallbackData func(nav *utils.Navigator)
 type InitCustomData func(*http.Request, *utils.Navigator) (interface{})
 type InitPageData func(*http.Request, *Page)
+type InitPageData2 func(*Page, int64, map[string]string, *http.Request)
 type InitHandlers func(*Controller)
 
 func (s *Controller) Add(url string)  {
@@ -127,7 +130,13 @@ func (ts Controller) LoadTemplate(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.MarshalIndent(page.Nav, "", "\t") // formatted
 	page.Data = string(data[:])
 	
-	ts.OnInitPageData(r, &page)
+	if ts.OnInitPageData != nil {
+		ts.OnInitPageData(r, &page)
+	}
+	
+	if ts.OnInitPageData2 != nil {
+		ts.OnInitPageData2(&page, session.GetVisitorId(r), mux.Vars(r), r)
+	}
 	
 	// merge the html content and custom data
 	t.Execute(w, page)
