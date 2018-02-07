@@ -81,7 +81,8 @@ func parseTemplate(fileName string, files []string) ([]string) {
 			} else if strings.Index(line, "##run=") == 0 {
 				var value string = strings.Split(line, "=")[1]
 				// var parts []string = strings.Split(value, "\\")
-				files = append(files, fmt.Sprintf("##code=desktop.subModule.load(%s)", value))
+				files = append(files, fmt.Sprintf("##code=if(desktop && desktop.subModule) {desktop.subModule.load(%s)}", value))
+				// files = append(files, fmt.Sprintf("##code=desktop.subModule.load(%s);", value))
 				// files = append(files, fmt.Sprintf("##code=%s", value))
 				// files = parseTemplate(getFile(line, ".jst"), files)
 			}
